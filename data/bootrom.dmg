@@ -31,7 +31,7 @@ Addr_0027:
 	INC DE		; $002e
 	LD A,E		; $002f
 	CP $34		; $0030
-	JR NZ, Addr_0027	; $0032
+	JR NZ, Addr_0027	; $0032 (back 0x0B bytes)
 
 	LD DE,$00d8		; $0034  Load 8 additional bytes into Video RAM
 	LD B,$08		; $0037
@@ -41,7 +41,7 @@ Addr_0039:
 	LD (HL+),A		; $003b
 	INC HL		; $003c
 	DEC B			; $003d
-	JR NZ, Addr_0039	; $003e
+	JR NZ, Addr_0039	; $003e (back 0x05 bytes)
 
 	LD A,$19		; $0040  Setup background tilemap
 	LD ($9910),A	; $0042
@@ -50,12 +50,12 @@ Addr_0048:
 	LD C,$0c		; $0048
 Addr_004A:
 	DEC A			; $004a
-	JR Z, Addr_0055	; $004b
+	JR Z, Addr_0055	; $004b (forward 0x0A bytes)
 	LD (HL-),A		; $004d
 	DEC C			; $004e
-	JR NZ, Addr_004A	; $004f
+	JR NZ, Addr_004A	; $004f (offset 0xFB bytes, -5)
 	LD L,$0f		; $0051
-	JR Addr_0048	; $0053
+	JR Addr_0048	; $0053 (offset 0xF5 bytes, -11)
 
 	; === Scroll logo on screen, and play logo sound===
 
@@ -74,21 +74,21 @@ Addr_0062:
 Addr_0064:
 	LD A,($FF00+$44)	; $0064  wait for screen frame
 	CP $90		; $0066
-	JR NZ, Addr_0064	; $0068
+	JR NZ, Addr_0064	; $0068 (offset 0xFC bytes, -4)
 	DEC C			; $006a
-	JR NZ, Addr_0064	; $006b
+	JR NZ, Addr_0064	; $006b (offset 0xF9 bytes, -7)
 	DEC E			; $006d
-	JR NZ, Addr_0062	; $006e
+	JR NZ, Addr_0062	; $006e (offset 0xF4 bytes, -12)
 
 	LD C,$13		; $0070
 	INC H			; $0072  increment scroll count
 	LD A,H		; $0073
 	LD E,$83		; $0074
 	CP $62		; $0076  $62 counts in, play sound #1
-	JR Z, Addr_0080	; $0078
+	JR Z, Addr_0080	; $0078 (offset 0x08 bytes, 8)
 	LD E,$c1		; $007a
 	CP $64		; $007c
-	JR NZ, Addr_0086	; $007e  $64 counts in, play sound #2
+	JR NZ, Addr_0086	; $007e  $64 counts in, play sound #2 (offset 0x08 bytes, 8)
 Addr_0080:
 	LD A,E		; $0080  play sound
 	LD ($FF00+C),A	; $0081
@@ -100,13 +100,13 @@ Addr_0086:
 	SUB B			; $0088
 	LD ($FF00+$42),A	; $0089  scroll logo up if B=1
 	DEC D			; $008b
-	JR NZ, Addr_0060	; $008c
+	JR NZ, Addr_0060	; $008c (offset 0xD4 bytes, -44)
 
 	DEC B			; $008e  set B=0 first time
-	JR NZ, Addr_00E0	; $008f    ... next time, cause jump to "Nintendo Logo check"
+	JR NZ, Addr_00E0	; $008f    ... next time, cause jump to "Nintendo Logo check" (offset 0x51 bytes, 81)
 
 	LD D,$20		; $0091  use scrolling loop to pause
-	JR Addr_0060	; $0093
+	JR Addr_0060	; $0093 (offset 0xCD bytes, -51)
 
 	; ==== Graphic routine ====
 
@@ -120,7 +120,7 @@ Addr_0098:
 	RL C			; $009d
 	RLA			; $009f
 	DEC B			; $00a0
-	JR NZ, Addr_0098	; $00a1
+	JR NZ, Addr_0098	; $00a1 (offset 0xF7 bytes, -9)
 	LD (HL+),A		; $00a3
 	INC HL		; $00a4
 	LD (HL+),A		; $00a5
@@ -147,11 +147,11 @@ Addr_00E6:
 	LD A,(DE)		; $00e6
 	INC DE		; $00e7
 	CP (HL)		; $00e8	;compare logo data in cart to DMG rom
-	JR NZ,$fe		; $00e9	;if not a match, lock up here
+	JR NZ,$fe		; $00e9	;if not a match, lock up here (offset 0x15 bytes, 21)
 	INC HL		; $00eb
 	LD A,L		; $00ec
 	CP $34		; $00ed	;do this for $30 bytes
-	JR NZ, Addr_00E6	; $00ef
+	JR NZ, Addr_00E6	; $00ef (offset 0xF7, -9)
 
 	LD B,$19		; $00f1
 	LD A,B		; $00f3
@@ -159,9 +159,9 @@ Addr_00F4:
 	ADD (HL)		; $00f4
 	INC HL		; $00f5
 	DEC B			; $00f6
-	JR NZ, Addr_00F4	; $00f7
+	JR NZ, Addr_00F4	; $00f7 (offset 0xFD bytes, -3)
 	ADD (HL)		; $00f9
-	JR NZ,$fe		; $00fa	; if $19 + bytes from $0134-$014D  don't add to $00
+	JR NZ,$fe		; $00fa	; if $19 + bytes from $0134-$014D  don't add to $00 (offset 0x04 bytes, 4)
 						;  ... lock up
 
 	LD A,$01		; $00fc
